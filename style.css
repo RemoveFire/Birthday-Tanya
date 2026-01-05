@@ -1,0 +1,313 @@
+/* =========================================================
+   ШРИФТЫ
+   ========================================================= */
+
+@font-face {
+  font-family: 'Ceremonious One';
+  src: url('fonts/CeremoniousOne.woff2') format('woff2');
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Montserrat Thin';
+  src: url('fonts/Montserrat-Thin.woff2') format('woff2');
+  font-weight: 200;
+  font-display: block;
+}
+
+/* =========================================================
+   БАЗОВЫЕ НАСТРОЙКИ
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f6ede4;
+  overflow: hidden;
+}
+
+/* =========================================================
+   СЦЕНЫ (START / LETTER)
+   ========================================================= */
+
+.scene {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.2s ease;
+}
+
+.scene.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* =========================================================
+   СЕРДЦЕ (ТРИГГЕР)
+   ========================================================= */
+
+.image-trigger {
+  position: relative; /* нужно для свечения */
+  animation: float 3s ease-in-out infinite;
+  cursor: pointer;
+}
+
+.image-trigger img {
+  width: min(70vw, 320px);
+  display: block;
+  filter:
+    drop-shadow(0 0 25px rgba(255,200,160,.6))
+    drop-shadow(0 0 60px rgba(255,200,160,.35));
+}
+
+/* Парение сердца */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+/* ---------------------------------------------------------
+   ЗОЛОТОЕ СВЕЧЕНИЕ ПО КОНТУРУ СЕРДЦА
+   (рабочее, проверенное, не конфликтует)
+   --------------------------------------------------------- */
+
+.image-trigger::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("img/frame01.png") no-repeat center / contain;
+  filter:
+    blur(3px)
+    drop-shadow(0 0 6px rgba(255,210,140,1))
+    drop-shadow(0 0 12px rgba(255,190,110,0.95));
+  opacity: 0.9;
+  transform: scale(1.03);
+  pointer-events: none;
+}
+
+/* =========================================================
+   ВИДЕО ФОН
+   ========================================================= */
+
+.scene-letter video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dark-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(2px);
+}
+
+/* =========================================================
+   ОСНОВНОЙ КОНТЕНТ
+   ========================================================= */
+
+.content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  color: white;
+  padding: 20px;
+  cursor: pointer;
+  transition: opacity .6s ease;
+}
+
+.content.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* =========================================================
+   ЗАГОЛОВКИ
+   ========================================================= */
+
+.hero-title {
+  font-family: 'Ceremonious One', serif;
+  font-size: 72px;
+  letter-spacing: 2px;
+  margin-bottom: -0.45em; /* осознанный отрицательный отступ */
+  font-weight: normal;
+}
+
+.hero-title span {
+  opacity: 0;
+  transition: opacity .8s ease;
+}
+
+/* ---------------------------------------------------------
+   ФИКС "ПРЫЖКОВ" ПРИ ПЕЧАТИ H2
+   --------------------------------------------------------- */
+
+.subtitle-wrapper {
+  position: relative;
+}
+
+.subtitle-ghost {
+  visibility: hidden;
+  font-family: 'Montserrat Thin', sans-serif;
+  font-size: 24px;
+  font-weight: 200;
+  line-height: 1.4;
+}
+
+.subtitle-live {
+  position: absolute;
+  inset: 0;
+  font-family: 'Montserrat Thin', sans-serif;
+  font-size: 24px;
+  font-weight: 200;
+  line-height: 1.4;
+}
+
+/* =========================================================
+   ПОДСКАЗКА "ПЕРЕЙТИ"
+   ========================================================= */
+
+.scroll-hint {
+  margin-top: 45px;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  animation: float 3s ease-in-out infinite;
+  cursor: pointer;
+}
+
+.scroll-hint.show {
+  opacity: 1;
+}
+
+.arrow {
+  width: 12px;
+  height: 12px;
+  border-left: 2px solid white;
+  border-bottom: 2px solid white;
+  transform: rotate(135deg);
+  margin: 0 auto 6px;
+}
+
+.hint-text {
+  font-family: 'Montserrat Thin', sans-serif;
+  font-size: 14px;
+}
+
+/* =========================================================
+   МОДАЛЬНОЕ ОКНО
+   ========================================================= */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.25);
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal-content {
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(10px);
+  border-radius: 26px;
+  padding: 32px;
+  max-width: 560px;
+  width: 90%;
+  text-align: center;
+}
+
+.modal-content h3 {
+  font-family: 'Ceremonious One', serif;
+  font-weight: normal;
+  font-size: 48px;
+  margin: 0 0 16px;
+  color: white;
+}
+
+/* ---------------------------------------------------------
+   ТЕКСТ СЕРТИФИКАТА
+   --------------------------------------------------------- */
+
+.cert-body {
+  font-family: 'Montserrat Thin', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.cert-body p {
+  margin: 6px 0;
+  color: white;
+}
+
+.cert-body .strong {
+  font-weight: 600;
+  margin-top: 14px;
+  margin-bottom: 2px;
+}
+
+.cert-body a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.phone-link {
+  color: white;
+  text-decoration: none;
+}
+
+/* ---------------------------------------------------------
+   КНОПКИ
+   --------------------------------------------------------- */
+
+.cert-actions {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.magic-btn {
+  padding: 12px 26px;
+  border-radius: 24px;
+  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(0,0,0,0.15);
+  cursor: pointer;
+  color: black;
+}
+
+.close {
+  margin-top: 28px;
+  padding: 12px 26px;
+  border-radius: 24px;
+  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(0,0,0,0.15);
+  cursor: pointer;
+  color: black;
+}
+
+/* =========================================================
+   ЭФФЕКТ ЗАТУХАНИЯ ПРИ МОДАЛКЕ
+   ========================================================= */
+
+.scene-letter.fading .dark-overlay {
+  background: rgba(0,0,0,0.65);
+  transition: background 0.6s ease;
+}
+
+.scene-letter.fading video {
+  filter: blur(2px);
+  transition: filter 0.6s ease;
+}
