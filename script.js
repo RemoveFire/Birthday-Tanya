@@ -17,16 +17,48 @@ const downloadPdf = document.getElementById('downloadPdf');
 const HERO_DELAY = 2000; // 2 секунды ожидания надписей после клика
 const HERO_STEP = 700;
 
-/* ❤️ PNG-анимация сердца */
-let frame = 1;
-const totalFrames = 12;
-const heartFrame = document.getElementById('heartFrame');
+const TOTAL_FRAMES = 12;
+const heartFrames = [];
+let framesLoaded = 0;
 
-setInterval(() => {
-  frame++;
-  if (frame > totalFrames) frame = 1;
-  heartFrame.src = `img/frame${String(frame).padStart(2, '0')}.png`;
-}, 120);
+function preloadHeartFrames(callback) {
+  for (let i = 1; i <= TOTAL_FRAMES; i++) {
+    const img = new Image();
+    img.src = `img/frame${String(i).padStart(2, '0')}.png`;
+    img.onload = () => {
+      framesLoaded++;
+      if (framesLoaded === TOTAL_FRAMES) {
+        callback();
+      }
+    };
+    heartFrames.push(img);
+  }
+}
+
+
+/* ❤️ PNG-анимация сердца */
+// let frame = 1;
+// const totalFrames = 12;
+// const heartFrame = document.getElementById('heartFrame');
+
+// setInterval(() => {
+//   frame++;
+//   if (frame > totalFrames) frame = 1;
+//   heartFrame.src = `img/frame${String(frame).padStart(2, '0')}.png`;
+// }, 120);
+let frame = 0;
+let heartInterval = null;
+
+function startHeartAnimation() {
+  if (heartInterval) return;
+
+  heartInterval = setInterval(() => {
+    frame++;
+    if (frame >= TOTAL_FRAMES) frame = 0;
+    heartFrame.src = heartFrames[frame].src;
+  }, 120);
+}
+
 
 function typeText(text, element, speed = 60) {
   let i = 0;
@@ -36,6 +68,13 @@ function typeText(text, element, speed = 60) {
     if (i === text.length) clearInterval(timer);
   }, speed);
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  preloadHeartFrames(() => {
+    startHeartAnimation();
+  });
+});
+
 
 envelope.addEventListener('click', async () => {
   start.style.opacity = '0';
