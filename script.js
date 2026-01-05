@@ -98,10 +98,18 @@ openPage.addEventListener('click', () => {
 });
 
 downloadPdf.addEventListener('click', () => {
-  const link = document.createElement('a');
-  link.href = 'Сертификат.pdf';
-  link.download = 'Сертификат.pdf';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+  if (isIOS) {
+    // iOS — открываем системный просмотрщик
+    window.open('Сертификат.pdf', '_blank');
+  } else {
+    // Android / Desktop — нормальная загрузка
+    const link = document.createElement('a');
+    link.href = 'Сертификат.pdf';
+    link.download = 'Сертификат.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
 });

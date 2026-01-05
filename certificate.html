@@ -111,7 +111,8 @@ body {
   opacity: .55;
   z-index: -1;
 
-  animation: edgeGlow 7s ease-in-out infinite;
+  /* animation: edgeGlow 7s ease-in-out infinite; */
+  animation: edgeGlow 7s cubic-bezier(0.76, -1.11, 0.58, 1) infinite;
 }
 
 @keyframes edgeGlow {
@@ -209,7 +210,13 @@ button {
   cursor: pointer;
   font-family: inherit;
   font-size: 14px;
+
+  /* Для iOS */
+  appearance: none;
+  -webkit-appearance: none;
+  color: #2e2e2e;
 }
+
 
 /* ================= PRINT ================= */
 @media print {
@@ -317,7 +324,9 @@ function render() {
   });
 
   const used = state.filter(Boolean).length;
-  remainingEl.textContent = `Использовано: ${used} · Осталось: ${TOTAL - used}`;
+  remainingEl.innerHTML = `
+  Использовано: <strong>${used}</strong> · 
+  Осталось: <strong>${TOTAL - used}</strong>`;
 }
 
 backBtn.onclick = () => {
