@@ -18,8 +18,50 @@ const HERO_DELAY = 2000; // 2 секунды ожидания надписей �
 const HERO_STEP = 700;
 
 const TOTAL_FRAMES = 12;
+const HEART_FRAMES = [];
+const resources = [];
 const heartFrames = [];
 let framesLoaded = 0;
+
+const preloader = document.getElementById('preloader');
+const progressBar = document.getElementById('preloaderProgress');
+
+const heartFrame = document.getElementById('heartFrame');
+
+// --- добавляем PNG кадры сердца ---
+for (let i = 1; i <= TOTAL_FRAMES; i++) {
+  const img = new Image();
+  img.src = `img/frame${String(i).padStart(2, '0')}.png`;
+  HEART_FRAMES.push(img);
+  resources.push(img);
+}
+
+// --- видео ---
+resources.push(video);
+
+// --- загрузка ресурсов с прогрессом ---
+let loaded = 0;
+
+function updateProgress() {
+  loaded++;
+  const percent = Math.round((loaded / resources.length) * 100);
+  progressBar.style.width = percent + '%';
+
+  if (loaded === resources.length) {
+    startApp();
+  }
+}
+
+resources.forEach(res => {
+  if (res.tagName === 'VIDEO') {
+    res.addEventListener('canplaythrough', updateProgress, { once: true });
+    res.load();
+  } else {
+    res.onload = updateProgress;
+  }
+});
+
+
 
 function preloadHeartFrames(callback) {
   for (let i = 1; i <= TOTAL_FRAMES; i++) {
@@ -36,7 +78,7 @@ function preloadHeartFrames(callback) {
 }
 
 
-/* ❤️ PNG-анимация сердца */
+/* PNG-анимация сердца */
 // let frame = 1;
 // const totalFrames = 12;
 // const heartFrame = document.getElementById('heartFrame');
@@ -152,3 +194,19 @@ downloadPdf.addEventListener('click', () => {
     document.body.removeChild(link);
   }
 });
+
+function startApp() {
+  // плавно убираем прелоадер
+  preloader.style.opacity = '0';
+  setTimeout(() => {
+    preloader.remove();
+  }, 600);
+
+  // стартуем PNG-анимацию сердца
+  let frame = 0;
+  setInterval(() => {
+    frame = (frame + 1) % TOTAL_FRAMES;
+    heartFrame.src = HEART_FRAMES[frame].src;
+  }, 120);
+}
+

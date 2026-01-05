@@ -1,4 +1,50 @@
 /* =========================================================
+   PRELOADER
+   ========================================================= */
+
+#preloader {
+  position: fixed;
+  inset: 0;
+  background: #f6ede4;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preloader-content {
+  text-align: center;
+}
+
+.preloader-title {
+  font-family: 'Ceremonious One', serif;
+  font-size: 48px;
+  margin-bottom: 24px;
+  color: #3a2f2a;
+}
+
+.preloader-bar {
+  width: 220px;
+  height: 4px;
+  background: rgba(0,0,0,0.15);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.preloader-progress {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    #e6c9a0,
+    #f2d6ad,
+    #e6c9a0
+  );
+  transition: width 0.3s ease;
+}
+
+
+/* =========================================================
    ШРИФТЫ
    ========================================================= */
 
