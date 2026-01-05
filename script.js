@@ -1,3 +1,7 @@
+/* =========================================================
+   ОСНОВНЫЕ ЭЛЕМЕНТЫ
+   ========================================================= */
+
 const envelope = document.getElementById('envelope');
 const start = document.getElementById('start');
 const letter = document.getElementById('letter');
@@ -14,21 +18,44 @@ const mainContent = document.getElementById('mainContent');
 const openPage = document.getElementById('openPage');
 const downloadPdf = document.getElementById('downloadPdf');
 
-const HERO_DELAY = 2000; // 2 секунды ожидания надписей после клика
-const HERO_STEP = 700;
-
-const TOTAL_FRAMES = 12;
-const HEART_FRAMES = [];
-const resources = [];
-const heartFrames = [];
-let framesLoaded = 0;
-
 const preloader = document.getElementById('preloader');
 const progressBar = document.getElementById('preloaderProgress');
 
 const heartFrame = document.getElementById('heartFrame');
 
-// --- добавляем PNG кадры сердца ---
+
+/* =========================================================
+   НАСТРОЙКИ ТЕКСТА
+   ========================================================= */
+
+const HERO_DELAY = 2000; // задержка перед первым словом
+const HERO_STEP  = 700;  // задержка между словами
+
+
+/* =========================================================
+   НАСТРОЙКИ PNG-Анимации СЕРДЦА
+   ========================================================= */
+
+const TOTAL_FRAMES = 12;
+const HEART_FRAMES = [];
+
+// целевая частота кадров сердца (адаптивная)
+const HEART_FPS = 10;
+const FRAME_DURATION = 1000 / HEART_FPS;
+
+let currentFrame = 0;
+let lastFrameTime = 0;
+let heartAnimationRunning = false;
+
+
+/* =========================================================
+   ПРЕДЗАГРУЗКА РЕСУРСОВ (PNG + VIDEO)
+   ========================================================= */
+
+const resources = [];
+let loadedResources = 0;
+
+// PNG кадры сердца
 for (let i = 1; i <= TOTAL_FRAMES; i++) {
   const img = new Image();
   img.src = `img/frame${String(i).padStart(2, '0')}.png`;
@@ -36,22 +63,25 @@ for (let i = 1; i <= TOTAL_FRAMES; i++) {
   resources.push(img);
 }
 
-// --- видео ---
+// Видео
 resources.push(video);
 
-// --- загрузка ресурсов с прогрессом ---
-let loaded = 0;
+
+/* =========================================================
+   ОБНОВЛЕНИЕ ПРОГРЕССА ЗАГРУЗКИ
+   ========================================================= */
 
 function updateProgress() {
-  loaded++;
-  const percent = Math.round((loaded / resources.length) * 100);
+  loadedResources++;
+  const percent = Math.round((loadedResources / resources.length) * 100);
   progressBar.style.width = percent + '%';
 
-  if (loaded === resources.length) {
+  if (loadedResources === resources.length) {
     startApp();
   }
 }
 
+// подписываемся на загрузку
 resources.forEach(res => {
   if (res.tagName === 'VIDEO') {
     res.addEventListener('canplaythrough', updateProgress, { once: true });
@@ -62,45 +92,46 @@ resources.forEach(res => {
 });
 
 
+/* =========================================================
+   REQUESTANIMATIONFRAME АНИМАЦИЯ СЕРДЦА
+   ========================================================= */
 
-function preloadHeartFrames(callback) {
-  for (let i = 1; i <= TOTAL_FRAMES; i++) {
-    const img = new Image();
-    img.src = `img/frame${String(i).padStart(2, '0')}.png`;
-    img.onload = () => {
-      framesLoaded++;
-      if (framesLoaded === TOTAL_FRAMES) {
-        callback();
-      }
-    };
-    heartFrames.push(img);
+function animateHeart(timestamp) {
+  if (!heartAnimationRunning) return;
+
+  if (timestamp - lastFrameTime >= FRAME_DURATION) {
+    currentFrame = (currentFrame + 1) % TOTAL_FRAMES;
+    heartFrame.src = HEART_FRAMES[currentFrame].src;
+    lastFrameTime = timestamp;
   }
+
+  requestAnimationFrame(animateHeart);
 }
-
-
-/* PNG-анимация сердца */
-// let frame = 1;
-// const totalFrames = 12;
-// const heartFrame = document.getElementById('heartFrame');
-
-// setInterval(() => {
-//   frame++;
-//   if (frame > totalFrames) frame = 1;
-//   heartFrame.src = `img/frame${String(frame).padStart(2, '0')}.png`;
-// }, 120);
-let frame = 0;
-let heartInterval = null;
 
 function startHeartAnimation() {
-  if (heartInterval) return;
-
-  heartInterval = setInterval(() => {
-    frame++;
-    if (frame >= TOTAL_FRAMES) frame = 0;
-    heartFrame.src = heartFrames[frame].src;
-  }, 120);
+  if (heartAnimationRunning) return;
+  heartAnimationRunning = true;
+  requestAnimationFrame(animateHeart);
 }
 
+
+/* =========================================================
+   ЗАПУСК ПРИЛОЖЕНИЯ ПОСЛЕ ЗАГРУЗКИ
+   ========================================================= */
+
+function startApp() {
+  // плавно убираем прелоадер
+  preloader.style.opacity = '0';
+  setTimeout(() => preloader.remove(), 600);
+
+  // стартуем сердце
+  startHeartAnimation();
+}
+
+
+/* =========================================================
+   ПЕЧАТЬ ТЕКСТА (H2)
+   ========================================================= */
 
 function typeText(text, element, speed = 60) {
   let i = 0;
@@ -111,12 +142,10 @@ function typeText(text, element, speed = 60) {
   }, speed);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  preloadHeartFrames(() => {
-    startHeartAnimation();
-  });
-});
 
+/* =========================================================
+   КЛИК ПО СЕРДЦУ → ОСНОВНАЯ СЦЕНА
+   ========================================================= */
 
 envelope.addEventListener('click', async () => {
   start.style.opacity = '0';
@@ -128,7 +157,6 @@ envelope.addEventListener('click', async () => {
     await document.fonts.ready;
     video.play().catch(() => {});
 
-    // меняем текст span'ов программно
     const heroTexts = ['С', 'Днём', 'Рождения', '!'];
 
     heroWords.forEach((word, i) => {
@@ -138,17 +166,11 @@ envelope.addEventListener('click', async () => {
       }, HERO_DELAY + i * HERO_STEP);
     });
 
-    // считаем, когда ВСЕ слова появились
     const heroTotalTime = HERO_DELAY + heroTexts.length * HERO_STEP;
 
-    // только после этого печатаем h2
     setTimeout(() => {
-      typeText(
-        'У меня для тебя особенный подарок',
-        subtitle
-      );
+      typeText('У меня для тебя особенный подарок', subtitle);
 
-      // и ещё через 6 сек — стрелка
       setTimeout(() => {
         scrollHint.classList.add('show');
       }, 6000);
@@ -159,20 +181,27 @@ envelope.addEventListener('click', async () => {
 });
 
 
+/* =========================================================
+   МОДАЛЬНОЕ ОКНО
+   ========================================================= */
+
 mainContent.addEventListener('click', () => {
-  letter.classList.add('fading');   // затемнение + blur
-  modal.classList.add('show');      // модалка
-  mainContent.classList.add('hidden'); // текст гарантированно исчез
+  letter.classList.add('fading');
+  modal.classList.add('show');
+  mainContent.classList.add('hidden');
   scrollHint.classList.remove('show');
 });
 
-
 closeModal.addEventListener('click', () => {
-  modal.classList.remove('show');       // убрали модалку
-  mainContent.classList.remove('hidden'); // вернули текст
-  letter.classList.remove('fading');    // убрали blur + затемнение
+  modal.classList.remove('show');
+  mainContent.classList.remove('hidden');
+  letter.classList.remove('fading');
 });
 
+
+/* =========================================================
+   КНОПКИ
+   ========================================================= */
 
 openPage.addEventListener('click', () => {
   window.open('certificate.html', '_blank');
@@ -182,10 +211,8 @@ downloadPdf.addEventListener('click', () => {
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
   if (isIOS) {
-    // iOS — открываем системный просмотрщик
     window.open('Сертификат.pdf', '_blank');
   } else {
-    // Android / Desktop — нормальная загрузка
     const link = document.createElement('a');
     link.href = 'Сертификат.pdf';
     link.download = 'Сертификат.pdf';
@@ -194,19 +221,3 @@ downloadPdf.addEventListener('click', () => {
     document.body.removeChild(link);
   }
 });
-
-function startApp() {
-  // плавно убираем прелоадер
-  preloader.style.opacity = '0';
-  setTimeout(() => {
-    preloader.remove();
-  }, 600);
-
-  // стартуем PNG-анимацию сердца
-  let frame = 0;
-  setInterval(() => {
-    frame = (frame + 1) % TOTAL_FRAMES;
-    heartFrame.src = HEART_FRAMES[frame].src;
-  }, 120);
-}
-
